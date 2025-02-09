@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  idUsuario Int        @id @default(autoincrement())
+  tipo      Tipo
+  nome      String
+  email     String     @unique
+  endereco  String
+  hash      String
+  salt      String
+  carrinho  Carrinho?
+  favoritos Favoritos?
+  produtos  Produto[]
+}
+
+model Produto {
+  idProduto  Int         @id @default(autoincrement())
+  idVendedor Int
+  nome       String
+  descricao  String
+  condicao   String
+  valor      Float
+  vendedor   Usuario     @relation(fields: [idVendedor], references: [idUsuario])
+  carrinho   Carrinho[]  @relation("CarrinhoToProduto")
+  favoritos  Favoritos[] @relation("FavoritosToProduto")
+}
+
+model Carrinho {
+  idCarrinho Int       @id @default(autoincrement())
+  idUsuario  Int       @unique
+  valorTotal Float
+  usuario    Usuario   @relation(fields: [idUsuario], references: [idUsuario])
+  produtos   Produto[] @relation("CarrinhoToProduto")
+}
+
+model Favoritos {
+  idFavoritos Int       @id @default(autoincrement())
+  idUsuario   Int       @unique
+  usuario     Usuario   @relation(fields: [idUsuario], references: [idUsuario])
+  produtos    Produto[] @relation("FavoritosToProduto")
+}
+
+enum Tipo {
+  Comprador
+  Vendedor
+}
